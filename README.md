@@ -4,6 +4,11 @@
 Scripts :
   Development - webpack --watch
   Production  - webpack
+  
+Live Links :
+
+    App Url   : http://datafix.herokuapp.com  (http://datafix.herokuapp.com)
+    Short Url : http://bit.ly/2eHXavL (http://bit.ly/2eHXavL)
 
 Sample Data :  
 
@@ -21,8 +26,4 @@ SQL Query :
 
     mysql -h us-cdbr-iron-east-04.cleardb.net -u b990c1f276fb62 -p heroku_d3db7047dd25b61 -d 39626419
 
-Live Links :
 
-
-    App Url   : http://datafix.herokuapp.com  (http://datafix.herokuapp.com)
-    Short Url : http://bit.ly/2eHXavL (http://bit.ly/2eHXavL)
