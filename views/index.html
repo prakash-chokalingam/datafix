@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Data Fix Console</title>
+    <link rel="icon" href="http://freshdesk.com/files/1813/9885/7672/favicon.ico" type="image/x-icon" sizes="16x16 32x32 64x64"/>
+  </head>
+  <body>
+    <div id="app">
+      <template id="application">
+        <div class="container">
+            <div class="container-fluid">
+                <div class="row">
+                    <h1>Data Fix Code Generator <sup><small><i>BETA</i></small></sup></h1>
+                    <div class="type-slider pull-right">
+                      <b>Manual</b> <label class="switch">
+                          <input type="checkbox" v-model="auto">
+                        <div class="slider"></div>
+                      </label> <b>Auto</b>
+                    </div>
+
+                    <div class="col-md-12" v-if="auto">
+                        <div class="form-group">
+                            <label for="query" class="hide">Query</label>
+                            <textarea type="search" id="query" class="form-control" placeholder="INSERT INTO ... (...)" v-model="query"></textarea>
+                            <br>
+                            <a href="#">Ticket Display Id : </a>
+                            <input type="text" v-model="ticketId" placeholder="Ticket Display id">
+                            <button class="btn btn-lg btn-primary pull-right" @click="generateCode">Generate Code</button>
+                        </div>
+                    </div>
+                    <div class="col-md-12" v-if="!error">
+                        <br>
+                        <br>
+                        <div class="row" v-if="generatedCode">
+                            <div class="col-md-8">
+                              <div class="alert alert-info" id="copied"> <span class="glyphicon glyphicon-exclamation-sign"></span> Copied</div>
+                              <button class="btn btn-default copybtn pull-right" data-clipboard-target="#copyData">
+                                <span class="glyphicon glyphicon-duplicate"></span> Copy
+                              </button>
+                                <div class="well">
+                                  <br>
+                                    <pre class="prettyprint"><code id="copyData">{{generatedCode}}</code></pre>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-success" v-if="generatedCode">
+                                    <b>Fix Type : </b> {{fixType}}
+                                </div>
+                                <div class="alert alert-success" v-if="emoji">
+                                    <span class="glyphicon glyphicon-ok-sign"></span> Done Emoji Fix
+                                </div>
+                                <div class="alert alert-success" v-if="generatedCode">
+                                    <span class="glyphicon glyphicon-ok-sign"></span> Done Html Fix
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" v-if="loading">
+                      <div class="sk-cube-grid">
+                        <div class="sk-cube sk-cube1"></div>
+                        <div class="sk-cube sk-cube2"></div>
+                        <div class="sk-cube sk-cube3"></div>
+                        <div class="sk-cube sk-cube4"></div>
+                        <div class="sk-cube sk-cube5"></div>
+                        <div class="sk-cube sk-cube6"></div>
+                        <div class="sk-cube sk-cube7"></div>
+                        <div class="sk-cube sk-cube8"></div>
+                        <div class="sk-cube sk-cube9"></div>
+                      </div>
+                    </div>
+                    <div class="col-md-12" v-if="error">
+                        <br>
+                        <br>
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span> Invalid Log given
+                        </div>
+                    </div>
+                    <div class="col-md-12" v-if="ticketIdError">
+                        <br>
+                        <br>
+                        <div class="alert alert-danger" role="alert">
+                            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                            <span class="sr-only">Error:</span> Please provide Ticket display id
+                        </div>
+                    </div>
+
+                    <!-- manual fix template -->
+                    <div class="col-md-12" v-if="!auto">
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Fix Type</label>
+                        <select v-model="manual.type" class="form-control">
+                          <option value="tktFix">Ticket Fix</option>
+                          <option value="noteFix">Note Fix</option>
+                        </select>
+                      </div>
+                      <div v-if="manualType">
+                        <!-- tkt fix codes -->
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Account Id</label>
+                          <input type="text" class="form-control" v-model="manual.accountId" placeholder="Account Id">
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Ticket Display Id</label>
+                          <input type="text" class="form-control" v-model="ticketId" placeholder="Ticket Display Id">
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Description</label>
+                          <textarea class="form-control" v-model="manual.description" placeholder="Description"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Description Html</label>
+                          <textarea  class="form-control" v-model="manual.descriptionHtml" placeholder="Description Html"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <button class="btn btn-lg btn-primary pull-right" @click="manualCodeGenerate">Generate Code</button>
+                        </div>
+                      </div>
+                      <div v-if="!manualType">
+                        <!-- note fix codes -->
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Account Id</label>
+                          <input type="text" class="form-control" v-model="manual.accountId" placeholder="Account Id">
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Note Id</label>
+                          <input type="text" class="form-control" v-model="manual.noteId" placeholder="Note Id">
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Body</label>
+                          <textarea class="form-control" v-model="manual.body" placeholder="Body"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Body Html</label>
+                          <textarea class="form-control" v-model="manual.bodyHtml" placeholder="Body Html"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Full Text</label>
+                          <textarea class="form-control" v-model="manual.fullText" placeholder="Full Text"></textarea>
+                        </div>
+                        <div class="form-group">
+                          <button class="btn btn-lg btn-primary pull-right" @click="manualCodeGenerate">Generate Code</button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </template>
+
+    </div>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="js/bundle.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+  </body>
+</html>
