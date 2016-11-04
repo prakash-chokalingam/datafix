@@ -65,8 +65,6 @@
 	__webpack_require__(17);
 	__webpack_require__(19);
 
-	console.log("gixxxx");
-
 	// initiating vue instance
 	var vm = new _vue2.default({
 	  el: "#app",

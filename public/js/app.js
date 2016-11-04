@@ -8,8 +8,6 @@ require('./../scss/spinner.scss')
 require('./../scss/app.scss')
 require('./../scss/slider.scss')
 
-console.log("gixxxx");
-
 // initiating vue instance
 var vm = new Vue({
   el:"#app",
