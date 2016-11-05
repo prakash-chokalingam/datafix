@@ -122,6 +122,8 @@
 	            for (var d in this.manual) {
 	                _this.manual[d] = "";
 	            }
+	            this.error = false;
+	            this.ticketIdError = false;
 	            this.ticketId = "";
 	            this.emoji = false;
 	            this.generatedCode = "";
@@ -243,37 +245,13 @@
 	        cleanHtml: function cleanHtml(html, resolve, reject) {
 	            html = html.replace(/\\"/g, '');
 	            $.ajax({
-	                url: "/clean-html",
+	                url: "/minify",
 	                type: "POST",
 	                data: {
 	                    code: html
 	                },
 	                success: function success(data) {
-	                    data = JSON.parse(data);
-	                    var regex = /<body>([\w\W]*?)<\/body>/g;
-	                    var str = data.clean;
-	                    var m = void 0;
-	                    var result = void 0;
-	                    while ((m = regex.exec(str)) !== null) {
-	                        // This is necessary to avoid infinite loops with zero-width matches
-	                        if (m.index === regex.lastIndex) {
-	                            regex.lastIndex++;
-	                        }
-	                        result = m[1];
-	                    }
-	                    $.ajax({
-	                        url: "/minify",
-	                        type: "POST",
-	                        data: {
-	                            code: html
-	                        },
-	                        success: function success(data) {
-	                            resolve(data.replace(/"/g, '\\"'));
-	                        },
-	                        error: function error(data) {
-	                            alert("something went wrong");
-	                        }
-	                    });
+	                    resolve(data.replace(/"/g, '\\"'));
 	                },
 	                error: function error(data) {
 	                    reject(data);

@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
-var cleaner = require('dirty-markup');
+// var cleaner = require('dirty-markup');
 var request = require('request');
 var htmlmin = require('htmlmin');
 var mysql = require('mysql');
@@ -77,17 +77,17 @@ app.post('/parser', function(req,res) {
 
 });
 
-// mark up clean
-app.post('/clean-html',function(req,response) {
-  request.post({url:"https://dirtymarkup.com/api/html",form:{code:req.body.code}},function(err,res,body){
-    if (!err && res.statusCode == 200) {
-        response.send(body);
-      }
-      else {
-        console.log(err);
-      }
-  });
-});
+// mark up clean -- removed
+// app.post('/clean-html',function(req,response) {
+//   request.post({url:"https://dirtymarkup.com/api/html",form:{code:req.body.code}},function(err,res,body){
+//     if (!err && res.statusCode == 200) {
+//         response.send(htmlmin(body));
+//       }
+//       else {
+//         console.log(err);
+//       }
+//   });
+// });
 
 // minifier
 app.post('/minify',function(req,res) {

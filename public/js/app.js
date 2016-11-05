@@ -64,6 +64,8 @@ var vm = new Vue({
             for (let d in this.manual) {
                 _this.manual[d] = "";
             }
+            this.error = false;
+            this.ticketIdError = false;
             this.ticketId = "";
             this.emoji = false;
             this.generatedCode = "";
@@ -183,37 +185,13 @@ var vm = new Vue({
         cleanHtml: function(html, resolve, reject) {
             html = html.replace(/\\"/g, '');
             $.ajax({
-                url: "/clean-html",
+                url: "/minify",
                 type: "POST",
                 data: {
                     code: html,
                 },
                 success: function(data) {
-                    data = JSON.parse(data);
-                    let regex = /<body>([\w\W]*?)<\/body>/g;
-                    let str = data.clean;
-                    let m;
-                    let result;
-                    while ((m = regex.exec(str)) !== null) {
-                        // This is necessary to avoid infinite loops with zero-width matches
-                        if (m.index === regex.lastIndex) {
-                            regex.lastIndex++;
-                        }
-                        result = m[1];
-                    }
-                    $.ajax({
-                        url: "/minify",
-                        type: "POST",
-                        data: {
-                            code: html,
-                        },
-                        success: function(data) {
-                            resolve(data.replace(/"/g, '\\"'));
-                        },
-                        error: function(data) {
-                            alert("something went wrong");
-                        }
-                    });
+                    resolve(data.replace(/"/g, '\\"'));
                 },
                 error: function(data) {
                     reject(data)
