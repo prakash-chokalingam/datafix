@@ -67,293 +67,294 @@
 
 	// initiating vue instance
 	var vm = new _vue2.default({
-	  el: "#app",
-	  template: "#application",
-	  mounted: function mounted() {
-	    var clipboard = new _clipboard2.default('.copybtn');
-	    clipboard.on('success', function (e) {
-	      document.getElementById("copied").style.display = "block";
-	      e.clearSelection();
-	    });
-	  },
-
-	  data: {
-	    auto: true,
-	    query: "",
-	    fixType: "",
-	    emoji: false,
-	    cleanHtml: true,
-	    error: false,
-	    ticketId: "",
-	    ticketIdError: false,
-	    loading: false,
-	    generatedCode: "",
-	    manual: {
-	      type: "tktFix",
-	      description: "",
-	      descriptionHtml: "",
-	      accountId: "",
-	      body: "",
-	      bodyHtml: "",
-	      fullText: "",
-	      noteId: ""
-	    }
-	  },
-	  // computed
-	  computed: {
-	    // manual type
-	    manualType: function manualType() {
-
-	      this.ticketId = "";
-	      this.emoji = false;
-	      this.generatedCode = "";
-
-	      if (this.manual.type == "tktFix") {
-	        return true;
-	      } else {
-	        return false;
-	      }
-	    }
-	  },
-	  // watchers
-	  watch: {
-	    auto: function auto() {
-	      var _this = this;
-	      for (var d in this.manual) {
-	        _this.manual[d] = "";
-	      }
-	      this.ticketId = "";
-	      this.emoji = false;
-	      this.generatedCode = "";
-	      this.manual.type = "tktFix";
-	    }
-	  },
-	  methods: {
-	    generateCode: function generateCode() {
-	      this.generatedCode = "";
-	      // has invalid emoji check
-	      if (this.query.indexOf("�")) {
-	        this.emoji = true;
-	      } else {
-	        this.emoji = false;
-	      }
-	      // checking for ticket display id
-	      if (!this.ticketId) {
-	        this.ticketIdError = true;
-	        return;
-	      } else {
-	        this.ticketIdError = false;
-	      }
-
-	      // codes for ticket data fix
-	      if (this.query.indexOf('helpdesk_ticket_bodies') > -1) {
-	        this.fixType = "Ticket Fix";
-	        this.error = false;
-	        this.tickeFix();
-	      } else if (this.query.indexOf('helpdesk_note_bodies') > -1) {
-	        this.fixType = "Note Fix";
-	        this.error = false;
-	        this.noteFix();
-	      } else {
-	        this.error = true;
-	      }
+	    el: "#app",
+	    template: "#application",
+	    mounted: function mounted() {
+	        var clipboard = new _clipboard2.default('.copybtn');
+	        clipboard.on('success', function (e) {
+	            document.getElementById("copied").style.display = "block";
+	            e.clearSelection();
+	        });
 	    },
-	    tickeFix: function tickeFix() {
-	      this.loading = true;
-	      var _this = this;
-	      var templateData = {};
-	      var query = this.query;
-	      $.ajax({
-	        url: "parser",
-	        type: "POST",
-	        data: {
-	          code: query,
-	          table: "helpdesk_ticket_bodies"
-	        },
-	        success: function success(data) {
-	          templateData.accountId = data.account_id;
-	          templateData.description = _this.cleanEmoji(data.description);
-	          var promise = new Promise(function (resolve, reject) {
-	            _this.cleanHtml(_this.cleanEmoji(data.description_html), resolve, reject);
-	          });
-	          promise.then(function (data) {
-	            templateData.descriptionHtml = data;
-	            _this.tktFixTemplate(templateData);
-	          }, function (err) {
-	            alert("Something went wrong !");
-	          });
-	        },
-	        error: function error() {
-	          alert("Something went wrong !");
+
+	    data: {
+	        auto: true,
+	        query: "",
+	        fixType: "",
+	        emoji: false,
+	        cleanHtml: true,
+	        error: false,
+	        ticketId: "",
+	        ticketIdError: false,
+	        loading: false,
+	        generatedCode: "",
+	        manual: {
+	            type: "tktFix",
+	            description: "",
+	            descriptionHtml: "",
+	            accountId: "",
+	            body: "",
+	            bodyHtml: "",
+	            fullText: "",
+	            noteId: ""
 	        }
-	      });
 	    },
-	    noteFix: function noteFix() {
-	      this.loading = true;
-	      var _this = this;
-	      var templateData = {};
-	      var query = this.query;
-	      $.ajax({
-	        url: "parser",
-	        type: "POST",
-	        data: {
-	          code: query,
-	          table: "helpdesk_note_bodies"
-	        },
-	        success: function success(data) {
-	          var _this2 = this;
+	    // computed
+	    computed: {
+	        // manual type
+	        manualType: function manualType() {
 
-	          templateData.body = _this.cleanEmoji(data.body);
-	          templateData.full_text = _this.cleanEmoji(data.full_text);
-	          templateData.account_id = data.account_id;
-	          templateData.note_id = data.note_id;
-	          var promise = new Promise(function (resolve, reject) {
-	            _this.cleanHtml(_this.cleanEmoji(data.body_html), resolve, reject);
-	          });
-	          promise.then(function (data) {
-	            templateData.body_html = data;
-	            _this2.loading = false;
-	            _this.noteFixTemplate(templateData);
-	          });
-	        }
-	      });
-	    },
-	    getValues: function getValues() {
-	      var regex = /VALUES \(([\w\W]*?)\)/g;
-	      var str = this.query;
-	      var m = void 0;
-	      while ((m = regex.exec(str)) !== null) {
-	        // This is necessary to avoid infinite loops with zero-width matches
-	        if (m.index === regex.lastIndex) {
-	          regex.lastIndex++;
-	        }
-	        return m[1];
-	      }
-	    },
+	            this.ticketId = "";
+	            this.emoji = false;
+	            this.generatedCode = "";
 
-	    cleanEmoji: function cleanEmoji(data) {
-	      var temp = data.replace(/�/g, "");
-	      // if(!html) {
-	      //   temp = temp.replace(/\\n/g, '');
-	      // } else {
-	      //   temp = temp.replace(/\\n/g, '<br />');
-	      // }
-	      return temp;
-	    },
-	    cleanHtml: function cleanHtml(html, resolve, reject) {
-	      html = html.replace(/\\"/g, '');
-	      $.ajax({
-	        url: "/clean-html",
-	        type: "POST",
-	        data: {
-	          code: html
-	        },
-	        success: function success(data) {
-	          data = JSON.parse(data);
-	          var regex = /<body>([\w\W]*?)<\/body>/g;
-	          var str = data.clean;
-	          var m = void 0;
-	          var result = void 0;
-	          while ((m = regex.exec(str)) !== null) {
-	            // This is necessary to avoid infinite loops with zero-width matches
-	            if (m.index === regex.lastIndex) {
-	              regex.lastIndex++;
+	            if (this.manual.type == "tktFix") {
+	                return true;
+	            } else {
+	                return false;
 	            }
-	            result = m[1];
-	          }
-	          $.ajax({
-	            url: "/minify",
-	            type: "POST",
-	            data: {
-	              code: html
-	            },
-	            success: function success(data) {
-	              resolve(data.replace(/"/g, '\\"'));
-	            },
-	            error: function error(data) {
-	              alert("something went wrong");
-	            }
-	          });
-	        },
-	        error: function error(data) {
-	          reject(data);
 	        }
-	      });
 	    },
-	    tktFixTemplate: function tktFixTemplate(data) {
-	      var tktFixTemplate = '\n         description = "' + data.description + '"\n\n\n          description_html = "' + data.descriptionHtml + '"\n\n\n          @script_tickets2 = {}\n          account_id = ' + data.accountId + '\n          Sharding.select_shard_of(account_id) do\n          account = Account.find_by_id(account_id).make_current\n          ticket = account.tickets.find_by_display_id ' + this.ticketId + '\n          ticket_old_body = ticket.ticket_old_body\n\n\n          @script_tickets2[:body] = ticket_old_body.description\n          @script_tickets2[:body_html] = ticket_old_body.description_html\n\n\n          ticket_old_body.description = description\n          ticket_old_body.description_html = description_html\n          ticket_old_body.save!\n          end ';
-	      this.generatedCode = tktFixTemplate;
-	      this.loading = false;
-	      this.doPrettify();
+	    // watchers
+	    watch: {
+	        auto: function auto() {
+	            var _this = this;
+	            for (var d in this.manual) {
+	                _this.manual[d] = "";
+	            }
+	            this.ticketId = "";
+	            this.emoji = false;
+	            this.generatedCode = "";
+	            this.manual.type = "tktFix";
+	        }
 	    },
-	    noteFixTemplate: function noteFixTemplate(data) {
-	      var noteFixTemplate = '\n       body = "' + data.body + '"\n\n       body_html = "' + data.body_html + '"\n\n       full_text = "' + data.full_text + '"\n\n       full_text_html = body_html\n\n      @script_tickets = {}\n      account_id = ' + data.account_id + '\n      Sharding.select_shard_of(account_id) do\n        account = Account.find_by_id(account_id).make_current\n        ticket = account.tickets.find_by_display_id ' + this.ticketId + '\n        note= ticket.notes.find_by_id ' + data.note_id + '\n        note_old_body = note.note_old_body\n\n\n        @script_tickets[:body] = note_old_body.body\n        @script_tickets[:body_html] = note_old_body.body_html\n        @script_tickets[:full_text] = note_old_body.full_text\n        @script_tickets[:full_text_html] = note_old_body.full_text_html\n\n\n        note_old_body.body = body\n        note_old_body.body_html = body_html\n        note_old_body.full_text = full_text\n        note_old_body.full_text_html = full_text_html\n        note_old_body.save!\n      end\n       ';
-	      this.generatedCode = noteFixTemplate;
-	      this.loading = false;
-	      this.doPrettify();
-	    },
-	    doPrettify: function doPrettify() {
-	      setTimeout(function () {
-	        PR.prettyPrint();
-	      }, 1000);
-	    },
-	    manualCodeGenerate: function manualCodeGenerate() {
-	      var _this3 = this;
+	    methods: {
+	        generateCode: function generateCode() {
+	            this.generatedCode = "";
+	            // has invalid emoji check
+	            if (this.query.indexOf("�")) {
+	                this.emoji = true;
+	            } else {
+	                this.emoji = false;
+	            }
+	            // checking for ticket display id
+	            if (!this.ticketId) {
+	                this.ticketIdError = true;
+	                return;
+	            } else {
+	                this.ticketIdError = false;
+	            }
 
-	      // has invalid emoji check
-	      if (this.manual.description.indexOf("�") > -1 || this.manual.descriptionHtml.indexOf("�") > -1) {
-	        this.emoji = true;
-	      } else {
-	        this.emoji = false;
-	      }
+	            // codes for ticket data fix
+	            if (this.query.indexOf('helpdesk_ticket_bodies') > -1) {
+	                this.fixType = "Ticket Fix";
+	                this.error = false;
+	                this.tickeFix();
+	            } else if (this.query.indexOf('helpdesk_note_bodies') > -1) {
+	                this.fixType = "Note Fix";
+	                this.error = false;
+	                this.noteFix();
+	            } else {
+	                this.error = true;
+	            }
+	        },
+	        tickeFix: function tickeFix() {
+	            this.loading = true;
+	            var _this = this;
+	            var templateData = {};
+	            var query = this.query;
+	            $.ajax({
+	                url: "parser",
+	                type: "POST",
+	                data: {
+	                    code: query,
+	                    table: "helpdesk_ticket_bodies"
+	                },
+	                success: function success(data) {
+	                    templateData.accountId = data.account_id;
+	                    templateData.description = _this.cleanEmoji(data.description, false);
+	                    var promise = new Promise(function (resolve, reject) {
+	                        _this.cleanHtml(_this.cleanEmoji(data.description_html, true), resolve, reject);
+	                    });
+	                    promise.then(function (data) {
+	                        templateData.descriptionHtml = data;
+	                        _this.tktFixTemplate(templateData);
+	                    }, function (err) {
+	                        alert("Something went wrong !");
+	                    });
+	                },
+	                error: function error() {
+	                    alert("Something went wrong !");
+	                }
+	            });
+	        },
+	        noteFix: function noteFix() {
+	            this.loading = true;
+	            var _this = this;
+	            var templateData = {};
+	            var query = this.query;
+	            $.ajax({
+	                url: "parser",
+	                type: "POST",
+	                data: {
+	                    code: query,
+	                    table: "helpdesk_note_bodies"
+	                },
+	                success: function success(data) {
+	                    var _this2 = this;
 
-	      if (this.manual.type == "tktFix") {
-	        var promise;
+	                    templateData.body = _this.cleanEmoji(data.body, false);
+	                    templateData.full_text = _this.cleanEmoji(data.full_text, false);
+	                    templateData.account_id = data.account_id;
+	                    templateData.note_id = data.note_id;
+	                    var promise = new Promise(function (resolve, reject) {
+	                        _this.cleanHtml(_this.cleanEmoji(data.body_html, true), resolve, reject);
+	                    });
+	                    promise.then(function (data) {
+	                        templateData.body_html = data;
+	                        _this2.loading = false;
+	                        _this.noteFixTemplate(templateData);
+	                    });
+	                }
+	            });
+	        },
+	        getValues: function getValues() {
+	            var regex = /VALUES \(([\w\W]*?)\)/g;
+	            var str = this.query;
+	            var m = void 0;
+	            while ((m = regex.exec(str)) !== null) {
+	                // This is necessary to avoid infinite loops with zero-width matches
+	                if (m.index === regex.lastIndex) {
+	                    regex.lastIndex++;
+	                }
+	                return m[1];
+	            }
+	        },
 
-	        (function () {
-	          _this3.loading = true;
-	          var templateData = {};
-	          var _this = _this3;
-	          _this.fixType = "Ticket Fix";
-	          templateData.accountId = _this.manual.accountId;
-	          templateData.description = _this.cleanEmoji(_this.manual.description);
-	          promise = new Promise(function (resolve, reject) {
-	            _this.cleanHtml(_this.cleanEmoji(_this.manual.descriptionHtml), resolve, reject);
-	          });
+	        cleanEmoji: function cleanEmoji(data, html) {
+	            var temp = data.replace(/�/g, "");
+	            if (!html) {
+	                temp = temp.replace(/\\n/g, '').replace(/"/g, '\\"');
+	            } else {
+	                temp = temp.replace(/\\n/g, '<br />');
+	            }
+	            return temp;
+	        },
+	        cleanHtml: function cleanHtml(html, resolve, reject) {
+	            html = html.replace(/\\"/g, '');
+	            $.ajax({
+	                url: "/clean-html",
+	                type: "POST",
+	                data: {
+	                    code: html
+	                },
+	                success: function success(data) {
+	                    data = JSON.parse(data);
+	                    var regex = /<body>([\w\W]*?)<\/body>/g;
+	                    var str = data.clean;
+	                    var m = void 0;
+	                    var result = void 0;
+	                    while ((m = regex.exec(str)) !== null) {
+	                        // This is necessary to avoid infinite loops with zero-width matches
+	                        if (m.index === regex.lastIndex) {
+	                            regex.lastIndex++;
+	                        }
+	                        result = m[1];
+	                    }
+	                    $.ajax({
+	                        url: "/minify",
+	                        type: "POST",
+	                        data: {
+	                            code: html
+	                        },
+	                        success: function success(data) {
+	                            resolve(data.replace(/"/g, '\\"'));
+	                        },
+	                        error: function error(data) {
+	                            alert("something went wrong");
+	                        }
+	                    });
+	                },
+	                error: function error(data) {
+	                    reject(data);
+	                }
+	            });
+	        },
+	        tktFixTemplate: function tktFixTemplate(data) {
+	            var tktFixTemplate = '\n         description = "' + data.description + '"\n\n\n          description_html = "' + data.descriptionHtml + '"\n\n\n          @script_tickets2 = {}\n          account_id = ' + data.accountId + '\n          Sharding.select_shard_of(account_id) do\n          account = Account.find_by_id(account_id).make_current\n          ticket = account.tickets.find_by_display_id ' + this.ticketId + '\n          ticket_old_body = ticket.ticket_old_body\n\n\n          @script_tickets2[:body] = ticket_old_body.description\n          @script_tickets2[:body_html] = ticket_old_body.description_html\n\n\n          ticket_old_body.description = description\n          ticket_old_body.description_html = description_html\n          ticket_old_body.save!\n          end ';
+	            this.generatedCode = tktFixTemplate;
+	            this.loading = false;
+	            this.doPrettify();
+	        },
+	        noteFixTemplate: function noteFixTemplate(data) {
+	            var noteFixTemplate = '\n       body = "' + data.body + '"\n\n       body_html = "' + data.body_html + '"\n\n       full_text = "' + data.full_text + '"\n\n       full_text_html = body_html\n\n      @script_tickets = {}\n      account_id = ' + data.account_id + '\n      Sharding.select_shard_of(account_id) do\n        account = Account.find_by_id(account_id).make_current\n        ticket = account.tickets.find_by_display_id ' + this.ticketId + '\n        note= ticket.notes.find_by_id ' + data.note_id + '\n        note_old_body = note.note_old_body\n\n\n        @script_tickets[:body] = note_old_body.body\n        @script_tickets[:body_html] = note_old_body.body_html\n        @script_tickets[:full_text] = note_old_body.full_text\n        @script_tickets[:full_text_html] = note_old_body.full_text_html\n\n\n        note_old_body.body = body\n        note_old_body.body_html = body_html\n        note_old_body.full_text = full_text\n        note_old_body.full_text_html = full_text_html\n        note_old_body.save!\n      end\n       ';
+	            this.generatedCode = noteFixTemplate;
+	            this.loading = false;
+	            this.doPrettify();
+	        },
+	        doPrettify: function doPrettify() {
+	            setTimeout(function () {
+	                PR.prettyPrint();
+	            }, 1000);
+	        },
+	        manualCodeGenerate: function manualCodeGenerate() {
+	            var _this3 = this;
 
-	          promise.then(function (data) {
-	            templateData.descriptionHtml = data;
-	            _this.tktFixTemplate(templateData);
-	          }, function (err) {
-	            alert("Something went wrong !");
-	          });
-	        })();
-	      }
-	      if (this.manual.type == "noteFix") {
-	        var promise;
+	            this.generatedCode = "";
+	            // has invalid emoji check
+	            if (this.manual.description.indexOf("�") > -1 || this.manual.descriptionHtml.indexOf("�") > -1) {
+	                this.emoji = true;
+	            } else {
+	                this.emoji = false;
+	            }
 
-	        (function () {
-	          _this3.loading = true;
-	          var templateData = {};
-	          var _this = _this3;
-	          _this.fixType = "Note Fix";
-	          templateData.body = _this.cleanEmoji(_this.manual.body);
-	          templateData.full_text = _this.cleanEmoji(_this.manual.fullText);
-	          templateData.account_id = _this.manual.accountId;
-	          templateData.note_id = _this.manual.noteId;
-	          promise = new Promise(function (resolve, reject) {
-	            _this.cleanHtml(_this.cleanEmoji(_this.manual.bodyHtml), resolve, reject);
-	          });
+	            if (this.manual.type == "tktFix") {
+	                var promise;
 
-	          promise.then(function (data) {
-	            templateData.body_html = data;
-	            _this3.loading = false;
-	            _this.noteFixTemplate(templateData);
-	          });
-	        })();
-	      }
+	                (function () {
+	                    _this3.loading = true;
+	                    var templateData = {};
+	                    var _this = _this3;
+	                    _this.fixType = "Ticket Fix";
+	                    templateData.accountId = _this.manual.accountId;
+	                    templateData.description = _this.cleanEmoji(_this.manual.description, false);
+	                    promise = new Promise(function (resolve, reject) {
+	                        _this.cleanHtml(_this.cleanEmoji(_this.manual.descriptionHtml, true), resolve, reject);
+	                    });
+
+	                    promise.then(function (data) {
+	                        templateData.descriptionHtml = data;
+	                        _this.tktFixTemplate(templateData);
+	                    }, function (err) {
+	                        alert("Something went wrong !");
+	                    });
+	                })();
+	            }
+	            if (this.manual.type == "noteFix") {
+	                var promise;
+
+	                (function () {
+	                    _this3.loading = true;
+	                    var templateData = {};
+	                    var _this = _this3;
+	                    _this.fixType = "Note Fix";
+	                    templateData.body = _this.cleanEmoji(_this.manual.body, false);
+	                    templateData.full_text = _this.cleanEmoji(_this.manual.fullText, false);
+	                    templateData.account_id = _this.manual.accountId;
+	                    templateData.note_id = _this.manual.noteId;
+	                    promise = new Promise(function (resolve, reject) {
+	                        _this.cleanHtml(_this.cleanEmoji(_this.manual.bodyHtml, true), resolve, reject);
+	                    });
+
+	                    promise.then(function (data) {
+	                        templateData.body_html = data;
+	                        _this3.loading = false;
+	                        _this.noteFixTemplate(templateData);
+	                    });
+	                })();
+	            }
+	        }
 	    }
-	  }
 	});
 
 /***/ },
