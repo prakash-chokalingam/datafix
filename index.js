@@ -16,11 +16,8 @@ var mysql = require('mysql');
 
 // end of connection
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  extended: true
-}));
-
-
+app.use(bodyParser.json({limit: '50mb'})); // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.set('port', (process.env.PORT || 5000));
 
 
@@ -69,7 +66,7 @@ app.post('/parser', function(req,res) {
        connection.query(q,function(err,row){
        });
        console.log(result.insertId + "Deleted");
-       connection.destroy();
+      //  connection.destroy();
        res.send(sendData);
     });
 
