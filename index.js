@@ -43,7 +43,7 @@ app.post('/parser', function(req,res) {
   var table = req.body.table;
   var sendData;
   //sql connection Production
-  var connection = mysql.createConnection("dummy");
+  var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
   connection.connect(function(err) {
     if(err) {
       console.error('error connecting: ' + err.stack);
