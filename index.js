@@ -43,7 +43,7 @@ app.post('/parser', function(req,res) {
   var table = req.body.table;
   var sendData;
   //sql connection Production
-  var connection = mysql.createConnection("dummy");
+  var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
   connection.connect(function(err) {
     if(err) {
       console.error('error connecting: ' + err.stack);
@@ -66,25 +66,13 @@ app.post('/parser', function(req,res) {
        connection.query(q,function(err,row){
        });
        console.log(result.insertId + "Deleted");
-      //  connection.destroy();
+       connection.destroy();
        res.send(sendData);
     });
 
   });
 
 });
-
-// mark up clean -- removed
-// app.post('/clean-html',function(req,response) {
-//   request.post({url:"https://dirtymarkup.com/api/html",form:{code:req.body.code}},function(err,res,body){
-//     if (!err && res.statusCode == 200) {
-//         response.send(htmlmin(body));
-//       }
-//       else {
-//         console.log(err);
-//       }
-//   });
-// });
 
 // minifier
 app.post('/minify',function(req,res) {

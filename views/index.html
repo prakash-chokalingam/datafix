@@ -11,7 +11,7 @@
         <div class="container">
             <div class="container-fluid">
                 <div class="row">
-                    <h1>Data Fix Code Generator <sup><small><i>BETA</i></small></sup></h1>
+                    <h1>Data Fix Code Generator</h1>
                     <div class="type-slider pull-right">
                       <b>Manual</b> <label class="switch">
                           <input type="checkbox" v-model="auto">
@@ -22,7 +22,7 @@
                     <div class="col-md-12" v-if="auto">
                         <div class="form-group">
                             <label for="query" class="hide">Query</label>
-                            <textarea type="search" id="query" class="form-control" placeholder="INSERT INTO ... (...)" v-model="query"></textarea>
+                            <textarea type="search" id="query" class="form-control" placeholder="INSERT INTO ... (...)" v-model.trim="query"></textarea>
                             <br>
                             <a href="#">Ticket Display Id : </a>
                             <input type="text" v-model="ticketId" placeholder="Ticket Display id">
@@ -35,9 +35,14 @@
                         <div class="row" v-if="generatedCode">
                             <div class="col-md-8">
                               <div class="alert alert-info" id="copied"> <span class="glyphicon glyphicon-exclamation-sign"></span> Copied</div>
-                              <button class="btn btn-default copybtn pull-right" data-clipboard-target="#copyData">
-                                <span class="glyphicon glyphicon-duplicate"></span> Copy
-                              </button>
+                              <div class="btn-group pull-right" role="group">
+                                <button class="btn btn-default copybtn" data-clipboard-target="#copyData">
+                                  <span class="glyphicon glyphicon-duplicate"></span> Copy
+                                </button>
+                                <button class="btn btn-default download" @click="downloadCode">
+                                  <span class="glyphicon glyphicon glyphicon-save"></span> Download
+                                </button>
+                              </div>
                                 <div class="well">
                                   <br>
                                     <pre class="prettyprint"><code id="copyData">{{generatedCode}}</code></pre>
@@ -107,11 +112,11 @@
                         </div>
                         <div class="form-group">
                           <label for="exampleInputEmail1">Description</label>
-                          <textarea class="form-control" v-model="manual.description" placeholder="Description"></textarea>
+                          <textarea class="form-control" v-model.trim="manual.description" placeholder="Description"></textarea>
                         </div>
                         <div class="form-group">
                           <label for="exampleInputEmail1">Description Html</label>
-                          <textarea  class="form-control" v-model="manual.descriptionHtml" placeholder="Description Html"></textarea>
+                          <textarea  class="form-control" v-model.trim="manual.descriptionHtml" placeholder="Description Html"></textarea>
                         </div>
                         <div class="form-group">
                           <button class="btn btn-lg btn-primary pull-right" @click="manualCodeGenerate">Generate Code</button>
@@ -133,15 +138,15 @@
                         </div>
                         <div class="form-group">
                           <label for="exampleInputEmail1">Body</label>
-                          <textarea class="form-control" v-model="manual.body" placeholder="Body"></textarea>
+                          <textarea class="form-control" v-model.trim="manual.body" placeholder="Body"></textarea>
                         </div>
                         <div class="form-group">
                           <label for="exampleInputEmail1">Body Html</label>
-                          <textarea class="form-control" v-model="manual.bodyHtml" placeholder="Body Html"></textarea>
+                          <textarea class="form-control" v-model.trim="manual.bodyHtml" placeholder="Body Html"></textarea>
                         </div>
                         <div class="form-group">
                           <label for="exampleInputEmail1">Full Text</label>
-                          <textarea class="form-control" v-model="manual.fullText" placeholder="Full Text"></textarea>
+                          <textarea class="form-control" v-model.trim="manual.fullText" placeholder="Full Text"></textarea>
                         </div>
                         <div class="form-group">
                           <button class="btn btn-lg btn-primary pull-right" @click="manualCodeGenerate">Generate Code</button>

@@ -2,6 +2,7 @@
 window.jQuery = window.$ = require('jquery')
 import Vue from 'vue';
 import Clipboard from 'clipboard';
+import fileSaver from 'file-saver';
 // scss
 require('./../scss/pritify.scss')
 require('./../scss/spinner.scss')
@@ -30,6 +31,7 @@ var vm = new Vue({
         ticketIdError: false,
         loading: false,
         generatedCode: "",
+        downloadFileName:"",
         manual: {
             type: "tktFix",
             description: "",
@@ -157,6 +159,9 @@ var vm = new Vue({
                         this.loading = false;
                         _this.noteFixTemplate(templateData);
                     })
+                },
+                error: function(data) {
+                  alert("Something went wrong !");
                 }
             });
         },
@@ -223,6 +228,7 @@ var vm = new Vue({
           ticket_old_body.save!
           end `;
             this.generatedCode = tktFixTemplate;
+            this.downloadFileName = `des_${data.accountId}#${this.ticketId}.txt`;
             this.loading = false;
             this.doPrettify();
         },
@@ -259,6 +265,7 @@ var vm = new Vue({
       end
        `;
             this.generatedCode = noteFixTemplate;
+            this.downloadFileName = `note_${data.account_id}-${data.note_id}#${this.ticketId}.txt`;
             this.loading = false;
             this.doPrettify();
         },
@@ -312,6 +319,11 @@ var vm = new Vue({
                 })
 
             }
+        },
+        downloadCode: function() {
+          let code = $("#copyData").text();
+          let blob = new Blob([code],{type: "text/plain;charset=utf-8"});
+          fileSaver.saveAs(blob,this.downloadFileName);
         }
     }
 });
