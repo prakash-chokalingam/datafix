@@ -12,13 +12,17 @@
             <div class="container-fluid">
                 <div class="row">
                     <h1>Data Fix Code Generator</h1>
-                    <div class="type-slider pull-right">
-                      <b>Manual</b> <label class="switch">
-                          <input type="checkbox" v-model="auto">
-                        <div class="slider"></div>
-                      </label> <b>Auto</b>
+                    <div class="row">
+                      <div class="col-md-2 type-slider  pull-right">
+                        <b>Manual</b> <label class="switch">
+                            <input type="checkbox" v-model="auto">
+                          <div class="slider"></div>
+                        </label> <b>Auto</b>
+                      </div>
+                      <div class="col-md-1 view-docs pull-right">
+                       <a href="https://docs.google.com/document/d/1ys90Y1nPxHZE8pf9k1A0agOpGArDfc6sPvZKQ31nGOs" target="_blank"><span class="glyphicon glyphicon-file"></span> <b>docs</b> </a>
+                     </div>
                     </div>
-
                     <div class="col-md-12" v-if="auto">
                         <div class="form-group">
                             <label for="query" class="hide">Query</label>

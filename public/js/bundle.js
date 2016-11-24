@@ -19536,7 +19536,7 @@
 
 
 	// module
-	exports.push([module.id, "#copied {\n  display: none; }\n\n#query {\n  height: 125px; }\n\n.type-slider b {\n  position: relative;\n  bottom: 10px; }\n", ""]);
+	exports.push([module.id, "#copied {\n  display: none; }\n\n#query {\n  height: 125px; }\n\n.type-slider b {\n  position: relative;\n  bottom: 10px; }\n\n.view-docs a {\n  color: black;\n  text-decoration: none; }\n\n.view-docs a:hover {\n  text-decoration: underline; }\n", ""]);
 
 	// exports
 
