@@ -46,6 +46,9 @@
                                 <button class="btn btn-default download" @click="downloadCode">
                                   <span class="glyphicon glyphicon glyphicon-save"></span> Download
                                 </button>
+                                <button class="btn btn-default download" data-toggle="modal" data-target="#attachToTicket" >
+                                  <span class="glyphicon glyphicon-open-file"></span> Attach to Ticket
+                                </button>
                               </div>
                                 <div class="well">
                                   <br>
@@ -107,7 +110,7 @@
                       <div v-if="manualType">
                         <!-- tkt fix codes -->
                         <div class="form-group">
-                          <label for="exampleInputEmail1">Account Id</label>
+                          <label for="exampleInputEmail1">Account Id </label>
                           <input type="text" class="form-control" v-model="manual.accountId" placeholder="Account Id">
                         </div>
                         <div class="form-group">
@@ -158,6 +161,54 @@
                       </div>
                     </div>
                 </div>
+            </div>
+            <!-- attach to ticket modal -->
+            <div class="modal fade" id="attachToTicket" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Attach data fix to Ticket</h4>
+                  </div>
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label for="add-note-as">Add note as</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control" v-model="addToTicket.apiKey" placeholder="Api Key" id="add-note-as" aria-describedby="basic-addon3">
+                        <span class="input-group-addon" @click="saveApi"><span class="glyphicon glyphicon-ok-sign"></span> save</span>
+                      </div>
+                      <span class="text-danger" v-if="!addToTicket.apiKey">
+                        Please provide api key : check out
+                        <a href="https://support.freshdesk.com/support/solutions/articles/215517-how-to-find-your-api-key" target="_blank"><b><span class="text-danger"><u>How to find your api key ?</u></span></b></a>
+                      </span>
+                    </div>
+                    <div class="form-group">
+                      <label for="add-note-as">Note:</label>
+                      <div class="input-group">
+                        <textarea type="text" v-model="addToTicket.note" class="form-control" id="add-note-as" aria-describedby="basic-addon3" placeholder="note content"></textarea>
+                        <span class="input-group-addon"  @click="saveNote"><span class="glyphicon glyphicon-ok-sign"></span> save</span>
+                      </div>
+                      <span class="text-warning" v-if="!addToTicket.note">
+                        Empty note will be added !
+                      </span>
+                    </div>
+                    <div class="form-input">
+                      <label for="add-note-as">Ticket Id</label>
+                      <div class="input-group">
+                        <span class="input-group-addon" id="basic-addon3">https://support.freshdesk.com/helpdesk/tickets/</span>
+                        <input type="number" class="form-control" v-model="addToTicket.ticketId" placeholder="Support ticket id" id="add-note-as" aria-describedby="basic-addon3">
+                      </div>
+                      <span class="text-danger" v-if="!addToTicket.ticketId">
+                        <b>Please provide ticket id.</b>
+                      </span>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" @click="sendToTicket">Save changes</button>
+                  </div>
+                </div>
+              </div>
             </div>
         </div>
       </template>

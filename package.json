@@ -21,6 +21,7 @@
     "webpack": "^1.13.3"
   },
   "dependencies": {
+    "ajax-request": "^1.2.1",
     "body-parser": "^1.15.2",
     "clipboard": "^1.5.15",
     "dirty-markup": "^1.0.6",

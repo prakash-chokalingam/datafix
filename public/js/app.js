@@ -19,6 +19,8 @@ var vm = new Vue({
             document.getElementById("copied").style.display = "block";
             e.clearSelection();
         });
+        // set api keys and note
+        this.setInitialData();
     },
     data: {
         auto: true,
@@ -41,6 +43,11 @@ var vm = new Vue({
             bodyHtml: "",
             fullText: "",
             noteId: "",
+        },
+        addToTicket: {
+          ticketId: "",
+          apiKey:"",
+          note:""
         }
     },
     // computed
@@ -57,7 +64,7 @@ var vm = new Vue({
             } else {
                 return false;
             }
-        }
+        },
     },
     // watchers
     watch: {
@@ -324,6 +331,55 @@ var vm = new Vue({
           let code = $("#copyData").text();
           let blob = new Blob([code],{type: "text/plain;charset=utf-8"});
           fileSaver.saveAs(blob,this.downloadFileName);
+        },
+        // attach to ticket
+        setInitialData: function() {
+          if(!localStorage.datafix) {
+            let temp = {};
+            temp.note = "Added data fix - via data fix app.";
+            temp.api = "";
+            localStorage.datafix = JSON.stringify(temp);
+          }
+          if(localStorage.datafix) {
+            let temp = JSON.parse(localStorage.datafix);
+            this.addToTicket.note =  temp.note;
+            this.addToTicket.apiKey = temp.api;
+          }
+        },
+        saveApi: function(e) {
+            let temp = JSON.parse(localStorage.datafix);
+            temp.api = this.addToTicket.apiKey;
+            localStorage.datafix = JSON.stringify(temp);
+            e.currentTarget.style.color = "green";
+          },
+        saveNote: function(e) {
+            let temp = JSON.parse(localStorage.datafix);
+            temp.note = this.addToTicket.note;
+            localStorage.datafix = JSON.stringify(temp);
+            e.currentTarget.style.color = "green";
+        },
+        sendToTicket: function(e) {
+          if(this.addToTicket.apiKey && this.addToTicket.ticketId) {
+            let _this = this;
+            e.currentTarget.innerText = "Please wait...";
+            $.ajax({
+              url:"/create-note",
+              type:"POST",
+              data: {
+                ticketId: _this.addToTicket.ticketId,
+                note: _this.addToTicket.note,
+                fileName: _this.downloadFileName,
+                api: "Basic " + btoa("zDQFXNMCg0bjoS02dugQ:x"),
+                file: $("#copyData").text()
+              },
+              success: function() {
+                e.currentTarget.innerText = "Done";
+              },
+              error: function() {
+                // e.currentTarget.innerText = "Error !";
+              }
+            });
+          }
         }
     }
 });

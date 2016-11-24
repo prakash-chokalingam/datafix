@@ -5,14 +5,17 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var htmlmin = require('htmlmin');
 var mysql = require('mysql');
+var currentRes = "";
+var fs = require('fs');
+var $ajax = require('ajax-request');
 // sql connection local
 
-// var connection = mysql.createConnection({
-//   socketPath: "/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock",
-//   user:"root",
-//   password: "",
-//   database: "datafix"
-// });
+var connection = mysql.createConnection({
+  socketPath: "/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock",
+  user:"root",
+  password: "",
+  database: "datafix"
+});
 
 // end of connection
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -43,7 +46,7 @@ app.post('/parser', function(req,res) {
   var table = req.body.table;
   var sendData;
   //sql connection Production
-  var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
+  // var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
   connection.connect(function(err) {
     if(err) {
       console.error('error connecting: ' + err.stack);
@@ -66,7 +69,7 @@ app.post('/parser', function(req,res) {
        connection.query(q,function(err,row){
        });
        console.log(result.insertId + "Deleted");
-       connection.destroy();
+      //  connection.destroy();
        res.send(sendData);
     });
 
@@ -78,6 +81,66 @@ app.post('/parser', function(req,res) {
 app.post('/minify',function(req,res) {
   var min = htmlmin(req.body.code);
   res.send(min);
+});
+
+// create note
+app.post('/create-note',function(req,res) {
+  // creating file
+  fs.writeFile('temp/'+req.body.fileName,req.body.file,function(err){
+    if(err) {
+        return console.log(err);
+    }
+   console.log("file created !");
+ });
+  var noteData = '{"body":"hello","incoming":true}';
+      $ajax({
+      url: 'https://prakashchokalingam.freshdesk.com/api/v2/tickets/181/notes',
+      method: 'POST',
+      contentType: "application/json; charset=utf-8",
+      dataType: "json",
+      data: noteData,
+      headers: {
+        "Authorization": req.body.api,
+      },
+    }, function(err, http, body) {
+      if(err) {
+        res.send(err);
+      } else {
+        res.send(body);
+      }
+    });
+  // request.post("https://prakashchokalingam.freshdesk.com/api/v2/tickets/181/notes",{
+  //     dataType: "json",
+  //     headers: {
+  //       "Authorization": req.body.api,
+  //     },
+  //     formData: noteData
+  // },function(err,http,body){
+  //   console.log(http);
+  //   console.log(body);
+  //   if(err) {
+  //     console.log(err);
+  //   } else {
+  //     res.send(body);
+  //   }
+  // });
+  // $.ajax({
+  //   url:"https://prakashchokalingam.freshdesk.com/api/v2/tickets/181/notes",
+  //   type: 'POST',
+  //   contentType: "application/json; charset=utf-8",
+  //   dataType: "json",
+  //   headers: {
+  //     "Authorization": "Basic " + btoa("zDQFXNMCg0bjoS02dugQ:x")
+  //   },
+  //   data: noteData,
+  //   success: function(data) {
+  //     console.log(data);
+  //   },
+  //   error: function(data) {
+  //     console.log(data);
+  //   }
+  // });
+
 });
 
 app.listen(app.get('port'), function() {
