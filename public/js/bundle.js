@@ -187,17 +187,21 @@
 	                    table: "helpdesk_ticket_bodies"
 	                },
 	                success: function success(data) {
-	                    templateData.accountId = data.account_id;
-	                    templateData.description = _this.cleanEmoji(data.description, false);
-	                    var promise = new Promise(function (resolve, reject) {
-	                        _this.cleanHtml(_this.cleanEmoji(data.description_html, true), resolve, reject);
-	                    });
-	                    promise.then(function (data) {
-	                        templateData.descriptionHtml = data;
-	                        _this.tktFixTemplate(templateData);
-	                    }, function (err) {
-	                        alert("Something went wrong !");
-	                    });
+	                    if (data == "error") {
+	                        alert("Invalid log");
+	                    } else {
+	                        templateData.accountId = data.account_id;
+	                        templateData.description = _this.cleanEmoji(data.description, false);
+	                        var promise = new Promise(function (resolve, reject) {
+	                            _this.cleanHtml(_this.cleanEmoji(data.description_html, true), resolve, reject);
+	                        });
+	                        promise.then(function (data) {
+	                            templateData.descriptionHtml = data;
+	                            _this.tktFixTemplate(templateData);
+	                        }, function (err) {
+	                            alert("Something went wrong !");
+	                        });
+	                    }
 	                },
 	                error: function error() {
 	                    alert("Something went wrong !");
@@ -219,18 +223,23 @@
 	                success: function success(data) {
 	                    var _this2 = this;
 
-	                    templateData.body = _this.cleanEmoji(data.body, false);
-	                    templateData.full_text = _this.cleanEmoji(data.full_text, false);
-	                    templateData.account_id = data.account_id;
-	                    templateData.note_id = data.note_id;
-	                    var promise = new Promise(function (resolve, reject) {
-	                        _this.cleanHtml(_this.cleanEmoji(data.body_html, true), resolve, reject);
-	                    });
-	                    promise.then(function (data) {
-	                        templateData.body_html = data;
-	                        _this2.loading = false;
-	                        _this.noteFixTemplate(templateData);
-	                    });
+	                    if (data == "error") {
+	                        alert("Invalid code");
+	                        return;
+	                    } else {
+	                        templateData.body = _this.cleanEmoji(data.body, false);
+	                        templateData.full_text = _this.cleanEmoji(data.full_text, false);
+	                        templateData.account_id = data.account_id;
+	                        templateData.note_id = data.note_id;
+	                        var promise = new Promise(function (resolve, reject) {
+	                            _this.cleanHtml(_this.cleanEmoji(data.body_html, true), resolve, reject);
+	                        });
+	                        promise.then(function (data) {
+	                            templateData.body_html = data;
+	                            _this2.loading = false;
+	                            _this.noteFixTemplate(templateData);
+	                        });
+	                    }
 	                },
 	                error: function error(data) {
 	                    alert("Something went wrong !");
@@ -268,7 +277,11 @@
 	                    code: html
 	                },
 	                success: function success(data) {
-	                    resolve(data.replace(/"/g, '\\"'));
+	                    if (data == "error") {
+	                        alert("Something went error !");
+	                    } else {
+	                        resolve(data.replace(/"/g, '\\"'));
+	                    }
 	                },
 	                error: function error(data) {
 	                    reject(data);
@@ -394,38 +407,28 @@
 	                    _this.addToTicket.error = false;
 	                    var dom = e.currentTarget;
 	                    dom.innerText = "Please wait...";
-	                    filepicker.setKey("Agyj3qXv2R16azvHtFq5tz");
-	                    var code = $("#copyData").text();
-	                    var blob = new Blob([code], {
-	                        type: "text/plain;charset=utf-8"
-	                    });
-	                    var url = void 0;
-	                    filepicker.store(blob, { filename: 'myCoolFile.txt' }, function (new_blob) {
-	                        var url = new_blob.url;
-	                        console.log(url);
-	                        $.ajax({
-	                            url: "/create-file",
-	                            type: "POST",
-	                            data: {
-	                                fileName: _this.downloadFileName,
-	                                file: url,
-	                                api: _this.addToTicket.apiKey,
-	                                note: _this.addToTicket.note,
-	                                tid: _this.addToTicket.ticketId
-	                            },
-	                            success: function success(data) {
-	                                dom.innerText = "Attach";
-	                                if (data == "done") {
-	                                    _this.addToTicket.success = true;
-	                                } else {
-	                                    _this.addToTicket.error = true;
-	                                }
-	                            },
-	                            error: function error() {
-	                                dom.innerText = "Attach";
+	                    $.ajax({
+	                        url: "/create-file",
+	                        type: "POST",
+	                        data: {
+	                            fileName: _this.downloadFileName,
+	                            file: $("#copyData").text(),
+	                            api: _this.addToTicket.apiKey,
+	                            note: _this.addToTicket.note,
+	                            tid: _this.addToTicket.ticketId
+	                        },
+	                        success: function success(data) {
+	                            dom.innerText = "Attach";
+	                            if (data == "done") {
+	                                _this.addToTicket.success = true;
+	                            } else {
 	                                _this.addToTicket.error = true;
 	                            }
-	                        });
+	                        },
+	                        error: function error() {
+	                            dom.innerText = "Attach";
+	                            _this.addToTicket.error = true;
+	                        }
 	                    });
 	                })();
 	            }

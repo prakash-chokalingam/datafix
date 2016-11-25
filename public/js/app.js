@@ -126,6 +126,9 @@ var vm = new Vue({
                     table: "helpdesk_ticket_bodies"
                 },
                 success: function(data) {
+                  if(data == "error") {
+                    alert("Invalid log");
+                  } else{
                     templateData.accountId = data.account_id;
                     templateData.description = _this.cleanEmoji(data.description, false);
                     var promise = new Promise((resolve, reject) => {
@@ -137,6 +140,8 @@ var vm = new Vue({
                     }, (err) => {
                         alert("Something went wrong !");
                     });
+                  }
+
                 },
                 error: function() {
                     alert("Something went wrong !");
@@ -156,6 +161,10 @@ var vm = new Vue({
                     table: "helpdesk_note_bodies"
                 },
                 success: function(data) {
+                  if(data == "error") {
+                    alert("Invalid code");
+                    return;
+                  } else {
                     templateData.body = _this.cleanEmoji(data.body, false);
                     templateData.full_text = _this.cleanEmoji(data.full_text, false);
                     templateData.account_id = data.account_id;
@@ -168,6 +177,7 @@ var vm = new Vue({
                         this.loading = false;
                         _this.noteFixTemplate(templateData);
                     })
+                  }
                 },
                 error: function(data) {
                     alert("Something went wrong !");
@@ -205,7 +215,11 @@ var vm = new Vue({
                     code: html,
                 },
                 success: function(data) {
+                  if(data == "error") {
+                    alert("Something went error !");
+                  } else {
                     resolve(data.replace(/"/g, '\\"'));
+                  }
                 },
                 error: function(data) {
                     reject(data)
@@ -369,44 +383,30 @@ var vm = new Vue({
                 _this.addToTicket.error = false;
                 let dom = e.currentTarget;
                 dom.innerText = "Please wait...";
-                filepicker.setKey("Agyj3qXv2R16azvHtFq5tz");
-                let code = $("#copyData").text();
-                let blob = new Blob([code], {
-                    type: "text/plain;charset=utf-8"
-                });
-                let url;
-                filepicker.store(
-                  blob,
-                  {filename: 'myCoolFile.txt'},
-                  function(new_blob){
-                    let url = new_blob.url;
-                    console.log(url);
-                    $.ajax({
-                        url: "/create-file",
-                        type: "POST",
-                        data: {
-                            fileName: _this.downloadFileName,
-                            file: url,
-                            api: _this.addToTicket.apiKey,
-                            note: _this.addToTicket.note,
-                            tid: _this.addToTicket.ticketId,
-                        },
-                        success: function(data) {
-                            dom.innerText = "Attach";
-                            if (data == "done") {
-                                _this.addToTicket.success = true;
+                $.ajax({
+                    url: "/create-file",
+                    type: "POST",
+                    data: {
+                        fileName: _this.downloadFileName,
+                        file: $("#copyData").text(),
+                        api: _this.addToTicket.apiKey,
+                        note: _this.addToTicket.note,
+                        tid: _this.addToTicket.ticketId,
+                    },
+                    success: function(data) {
+                        dom.innerText = "Attach";
+                        if (data == "done") {
+                            _this.addToTicket.success = true;
 
-                            } else {
-                                _this.addToTicket.error = true;
-                            }
-                        },
-                        error: function() {
-                            dom.innerText = "Attach";
+                        } else {
                             _this.addToTicket.error = true;
                         }
-                    });
-                  }
-                );
+                    },
+                    error: function() {
+                        dom.innerText = "Attach";
+                        _this.addToTicket.error = true;
+                    }
+                });
 
             }
         }

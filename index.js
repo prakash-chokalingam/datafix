@@ -24,9 +24,6 @@ if (!fs.existsSync(temp_dir))
 
 // end of connection
 app.use(bodyParser.json()); // to support JSON-encoded bodies
-app.use(bodyParser.json({
-    limit: '50mb'
-})); // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({
     limit: '50mb',
     extended: true
@@ -55,6 +52,7 @@ app.post('/parser', function(req, res) {
     var query = req.body.code;
     var table = req.body.table;
     var sendData;
+    currentRes = res;
     //sql connection Production
     var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
     connection.connect(function(err) {
@@ -87,12 +85,14 @@ app.post('/parser', function(req, res) {
 
 // minifier
 app.post('/minify', function(req, res) {
+    currentRes = res;
     var min = htmlmin(req.body.code);
     res.send(min);
 });
 
 // create note
 app.post('/create-file', function(req, res) {
+  currentRes = res;
   // creating file
   fs.writeFile('temp/' + req.body.fileName, req.body.file , function(err) {
       if (err) {
@@ -104,7 +104,7 @@ app.post('/create-file', function(req, res) {
   function createNote(req,res) {
     // adding note
   var API_KEY = req.body.api;
-  var FD_ENDPOINT = "prakashchokalingam";
+  var FD_ENDPOINT = "support";
   var PATH = "/api/v2/tickets/"+req.body.tid+"/notes";
   var enocoding_method = "base64";
   var auth = "Basic " + new Buffer(API_KEY + ":" + 'X').toString(enocoding_method);
@@ -124,13 +124,16 @@ app.post('/create-file', function(req, res) {
     .attach('attachments[]', fs.createReadStream(filePath))
     .end(function(response){
       if(response.status == 201){
+        fs.unlink(filePath);
         res.send("done");
         console.log("sent");
       }
       else{
+        fs.unlink(filePath);
         res.send("failed");
         console.log("failed");
         console.log(response.body);
+
       }
     });
 
@@ -143,4 +146,5 @@ app.listen(app.get('port'), function() {
 // err
 process.on('uncaughtException', function(err) {
     console.log('Caught exception: ' + err);
+    currentRes.send("error");
 });
