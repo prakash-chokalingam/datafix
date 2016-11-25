@@ -7,7 +7,12 @@ var htmlmin = require('htmlmin');
 var mysql = require('mysql');
 var currentRes = "";
 var fs = require('fs');
+var path = require("path");
 var unirest = require('unirest');
+var temp_dir = path.join(process.cwd(), 'temp/');
+
+if (!fs.existsSync(temp_dir))
+    fs.mkdirSync(temp_dir);
 // sql connection local
 
 // var connection = mysql.createConnection({
@@ -89,7 +94,7 @@ app.post('/minify', function(req, res) {
 // create note
 app.post('/create-file', function(req, res) {
   // creating file
-  fs.writeFile('public/temp/' + req.body.fileName, req.body.file , function(err) {
+  fs.writeFile('temp/' + req.body.fileName, req.body.file , function(err) {
       if (err) {
           return console.log(err);
       } else {
@@ -104,7 +109,7 @@ app.post('/create-file', function(req, res) {
   var enocoding_method = "base64";
   var auth = "Basic " + new Buffer(API_KEY + ":" + 'X').toString(enocoding_method);
   var URL =  "https://" + FD_ENDPOINT + ".freshdesk.com"+ PATH;
-  var filePath = "public/temp/"+req.body.fileName;
+  var filePath = "temp/"+req.body.fileName;
   var fields = {
     'body': req.body.note,
     'incoming': true,
@@ -119,7 +124,6 @@ app.post('/create-file', function(req, res) {
     .attach('attachments[]', fs.createReadStream(filePath))
     .end(function(response){
       if(response.status == 201){
-        fs.unlink(filePath);
         res.send("done");
         console.log("sent");
       }

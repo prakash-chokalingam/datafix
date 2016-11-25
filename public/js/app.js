@@ -369,31 +369,45 @@ var vm = new Vue({
                 _this.addToTicket.error = false;
                 let dom = e.currentTarget;
                 dom.innerText = "Please wait...";
-                $.ajax({
-                    url: "/create-file",
-                    type: "POST",
-                    data: {
-                        fileName: _this.downloadFileName,
-                        file: $("#copyData").text(),
-                        api: _this.addToTicket.apiKey,
-                        note: _this.addToTicket.note,
-                        tid: _this.addToTicket.ticketId,
-                    },
-                    success: function(data) {
-                        dom.innerText = "Attach";
-                        if (data == "done") {
-                            _this.addToTicket.success = true;
+                filepicker.setKey("Agyj3qXv2R16azvHtFq5tz");
+                let code = $("#copyData").text();
+                let blob = new Blob([code], {
+                    type: "text/plain;charset=utf-8"
+                });
+                let url;
+                filepicker.store(
+                  blob,
+                  {filename: 'myCoolFile.txt'},
+                  function(new_blob){
+                    let url = new_blob.url;
+                    console.log(url);
+                    $.ajax({
+                        url: "/create-file",
+                        type: "POST",
+                        data: {
+                            fileName: _this.downloadFileName,
+                            file: url,
+                            api: _this.addToTicket.apiKey,
+                            note: _this.addToTicket.note,
+                            tid: _this.addToTicket.ticketId,
+                        },
+                        success: function(data) {
+                            dom.innerText = "Attach";
+                            if (data == "done") {
+                                _this.addToTicket.success = true;
 
-                        } else {
+                            } else {
+                                _this.addToTicket.error = true;
+                            }
+                        },
+                        error: function() {
+                            dom.innerText = "Attach";
                             _this.addToTicket.error = true;
                         }
-                    },
-                    error: function() {
-                        // e.currentTarget.innerText = "Error !";
-                        dom.innerText = "Attach";
-                        _this.addToTicket.error = true;
-                    }
-                });
+                    });
+                  }
+                );
+
             }
         }
     }

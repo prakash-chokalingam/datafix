@@ -394,29 +394,38 @@
 	                    _this.addToTicket.error = false;
 	                    var dom = e.currentTarget;
 	                    dom.innerText = "Please wait...";
-	                    $.ajax({
-	                        url: "/create-file",
-	                        type: "POST",
-	                        data: {
-	                            fileName: _this.downloadFileName,
-	                            file: $("#copyData").text(),
-	                            api: _this.addToTicket.apiKey,
-	                            note: _this.addToTicket.note,
-	                            tid: _this.addToTicket.ticketId
-	                        },
-	                        success: function success(data) {
-	                            dom.innerText = "Attach";
-	                            if (data == "done") {
-	                                _this.addToTicket.success = true;
-	                            } else {
+	                    filepicker.setKey("Agyj3qXv2R16azvHtFq5tz");
+	                    var code = $("#copyData").text();
+	                    var blob = new Blob([code], {
+	                        type: "text/plain;charset=utf-8"
+	                    });
+	                    var url = void 0;
+	                    filepicker.store(blob, { filename: 'myCoolFile.txt' }, function (new_blob) {
+	                        var url = new_blob.url;
+	                        console.log(url);
+	                        $.ajax({
+	                            url: "/create-file",
+	                            type: "POST",
+	                            data: {
+	                                fileName: _this.downloadFileName,
+	                                file: url,
+	                                api: _this.addToTicket.apiKey,
+	                                note: _this.addToTicket.note,
+	                                tid: _this.addToTicket.ticketId
+	                            },
+	                            success: function success(data) {
+	                                dom.innerText = "Attach";
+	                                if (data == "done") {
+	                                    _this.addToTicket.success = true;
+	                                } else {
+	                                    _this.addToTicket.error = true;
+	                                }
+	                            },
+	                            error: function error() {
+	                                dom.innerText = "Attach";
 	                                _this.addToTicket.error = true;
 	                            }
-	                        },
-	                        error: function error() {
-	                            // e.currentTarget.innerText = "Error !";
-	                            dom.innerText = "Attach";
-	                            _this.addToTicket.error = true;
-	                        }
+	                        });
 	                    });
 	                })();
 	            }
