@@ -33,7 +33,7 @@ var vm = new Vue({
         ticketIdError: false,
         loading: false,
         generatedCode: "",
-        downloadFileName:"",
+        downloadFileName: "",
         manual: {
             type: "tktFix",
             description: "",
@@ -45,9 +45,11 @@ var vm = new Vue({
             noteId: "",
         },
         addToTicket: {
-          ticketId: "",
-          apiKey:"",
-          note:""
+            ticketId: "",
+            apiKey: "",
+            note: "",
+            error: false,
+            success: false,
         }
     },
     // computed
@@ -168,7 +170,7 @@ var vm = new Vue({
                     })
                 },
                 error: function(data) {
-                  alert("Something went wrong !");
+                    alert("Something went wrong !");
                 }
             });
         },
@@ -235,7 +237,7 @@ var vm = new Vue({
           ticket_old_body.save!
           end `;
             this.generatedCode = tktFixTemplate;
-            this.downloadFileName = `des_${data.accountId}#${this.ticketId}.txt`;
+            this.downloadFileName = `des-acc-${data.accountId}-tkt-${this.ticketId}.txt`;
             this.loading = false;
             this.doPrettify();
         },
@@ -272,7 +274,7 @@ var vm = new Vue({
       end
        `;
             this.generatedCode = noteFixTemplate;
-            this.downloadFileName = `note_${data.account_id}-${data.note_id}#${this.ticketId}.txt`;
+            this.downloadFileName = `note-acc-${data.account_id}id-${data.note_id}tkt-${this.ticketId}.txt`;
             this.loading = false;
             this.doPrettify();
         },
@@ -328,30 +330,32 @@ var vm = new Vue({
             }
         },
         downloadCode: function() {
-          let code = $("#copyData").text();
-          let blob = new Blob([code],{type: "text/plain;charset=utf-8"});
-          fileSaver.saveAs(blob,this.downloadFileName);
+            let code = $("#copyData").text();
+            let blob = new Blob([code], {
+                type: "text/plain;charset=utf-8"
+            });
+            fileSaver.saveAs(blob, this.downloadFileName);
         },
         // attach to ticket
         setInitialData: function() {
-          if(!localStorage.datafix) {
-            let temp = {};
-            temp.note = "Added data fix - via data fix app.";
-            temp.api = "";
-            localStorage.datafix = JSON.stringify(temp);
-          }
-          if(localStorage.datafix) {
-            let temp = JSON.parse(localStorage.datafix);
-            this.addToTicket.note =  temp.note;
-            this.addToTicket.apiKey = temp.api;
-          }
+            if (!localStorage.datafix) {
+                let temp = {};
+                temp.note = "Added data fix - via data fix app.";
+                temp.api = "";
+                localStorage.datafix = JSON.stringify(temp);
+            }
+            if (localStorage.datafix) {
+                let temp = JSON.parse(localStorage.datafix);
+                this.addToTicket.note = temp.note;
+                this.addToTicket.apiKey = temp.api;
+            }
         },
         saveApi: function(e) {
             let temp = JSON.parse(localStorage.datafix);
             temp.api = this.addToTicket.apiKey;
             localStorage.datafix = JSON.stringify(temp);
             e.currentTarget.style.color = "green";
-          },
+        },
         saveNote: function(e) {
             let temp = JSON.parse(localStorage.datafix);
             temp.note = this.addToTicket.note;
@@ -359,27 +363,36 @@ var vm = new Vue({
             e.currentTarget.style.color = "green";
         },
         sendToTicket: function(e) {
-          if(this.addToTicket.apiKey && this.addToTicket.ticketId) {
-            let _this = this;
-            e.currentTarget.innerText = "Please wait...";
-            $.ajax({
-              url:"/create-note",
-              type:"POST",
-              data: {
-                ticketId: _this.addToTicket.ticketId,
-                note: _this.addToTicket.note,
-                fileName: _this.downloadFileName,
-                api: "Basic " + btoa("zDQFXNMCg0bjoS02dugQ:x"),
-                file: $("#copyData").text()
-              },
-              success: function() {
-                e.currentTarget.innerText = "Done";
-              },
-              error: function() {
-                // e.currentTarget.innerText = "Error !";
-              }
-            });
-          }
+            if (this.addToTicket.apiKey && this.addToTicket.ticketId) {
+                let _this = this;
+                _this.addToTicket.success = false;
+                _this.addToTicket.error = false;
+                let dom = e.currentTarget;
+                dom.innerText = "Please wait...";
+                $.ajax({
+                    url: "/create-file",
+                    type: "POST",
+                    data: {
+                        fileName: _this.downloadFileName,
+                        file: $("#copyData").text(),
+                        api: _this.addToTicket.apiKey,
+                        note: _this.addToTicket.note,
+                        tid: _this.addToTicket.ticketId,
+                    },
+                    success: function(data) {
+                        dom.innerText = "Attach";
+                        if (data == "done") {
+                            _this.addToTicket.success = true;
+
+                        } else {
+                            _this.addToTicket.error = true;
+                        }
+                    },
+                    error: function() {
+                        // e.currentTarget.innerText = "Error !";
+                    }
+                });
+            }
         }
     }
 });

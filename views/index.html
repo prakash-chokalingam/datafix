@@ -202,10 +202,18 @@
                         <b>Please provide ticket id.</b>
                       </span>
                     </div>
+                    <div class="form-input result">
+                      <div class="pull-right">
+                        <span class="text-danger" v-if="addToTicket.error"><span class="glyphicon glyphicon-remove-circle"></span> Failed to attach.</span>
+                      </div>
+                      <div class="pull-right">
+                        <span class="text-success" v-if="addToTicket.success"><span class="glyphicon glyphicon-ok-circle"></span> Attached to ticket successfully.</span>
+                      </div>
+                  </div>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" @click="sendToTicket">Save changes</button>
+                    <button type="button" class="btn btn-primary" @click="sendToTicket">Attach</button>
                   </div>
                 </div>
               </div>

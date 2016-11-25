@@ -108,7 +108,9 @@
 	        addToTicket: {
 	            ticketId: "",
 	            apiKey: "",
-	            note: ""
+	            note: "",
+	            error: false,
+	            success: false
 	        }
 	    },
 	    // computed
@@ -276,14 +278,14 @@
 	        tktFixTemplate: function tktFixTemplate(data) {
 	            var tktFixTemplate = '\n         description = "' + data.description + '"\n\n\n          description_html = "' + data.descriptionHtml + '"\n\n\n          @script_tickets2 = {}\n          account_id = ' + data.accountId + '\n          Sharding.select_shard_of(account_id) do\n          account = Account.find_by_id(account_id).make_current\n          ticket = account.tickets.find_by_display_id ' + this.ticketId + '\n          ticket_old_body = ticket.ticket_old_body\n\n\n          @script_tickets2[:body] = ticket_old_body.description\n          @script_tickets2[:body_html] = ticket_old_body.description_html\n\n\n          ticket_old_body.description = description\n          ticket_old_body.description_html = description_html\n          ticket_old_body.save!\n          end ';
 	            this.generatedCode = tktFixTemplate;
-	            this.downloadFileName = 'des_' + data.accountId + '#' + this.ticketId + '.txt';
+	            this.downloadFileName = 'des-acc-' + data.accountId + '-tkt-' + this.ticketId + '.txt';
 	            this.loading = false;
 	            this.doPrettify();
 	        },
 	        noteFixTemplate: function noteFixTemplate(data) {
 	            var noteFixTemplate = '\n       body = "' + data.body + '"\n\n       body_html = "' + data.body_html + '"\n\n       full_text = "' + data.full_text + '"\n\n       full_text_html = body_html\n\n      @script_tickets = {}\n      account_id = ' + data.account_id + '\n      Sharding.select_shard_of(account_id) do\n        account = Account.find_by_id(account_id).make_current\n        ticket = account.tickets.find_by_display_id ' + this.ticketId + '\n        note= ticket.notes.find_by_id ' + data.note_id + '\n        note_old_body = note.note_old_body\n\n\n        @script_tickets[:body] = note_old_body.body\n        @script_tickets[:body_html] = note_old_body.body_html\n        @script_tickets[:full_text] = note_old_body.full_text\n        @script_tickets[:full_text_html] = note_old_body.full_text_html\n\n\n        note_old_body.body = body\n        note_old_body.body_html = body_html\n        note_old_body.full_text = full_text\n        note_old_body.full_text_html = full_text_html\n        note_old_body.save!\n      end\n       ';
 	            this.generatedCode = noteFixTemplate;
-	            this.downloadFileName = 'note_' + data.account_id + '-' + data.note_id + '#' + this.ticketId + '.txt';
+	            this.downloadFileName = 'note-acc-' + data.account_id + 'id-' + data.note_id + 'tkt-' + this.ticketId + '.txt';
 	            this.loading = false;
 	            this.doPrettify();
 	        },
@@ -351,7 +353,9 @@
 	        },
 	        downloadCode: function downloadCode() {
 	            var code = $("#copyData").text();
-	            var blob = new Blob([code], { type: "text/plain;charset=utf-8" });
+	            var blob = new Blob([code], {
+	                type: "text/plain;charset=utf-8"
+	            });
 	            _fileSaver2.default.saveAs(blob, this.downloadFileName);
 	        },
 	        // attach to ticket
@@ -381,26 +385,38 @@
 	            e.currentTarget.style.color = "green";
 	        },
 	        sendToTicket: function sendToTicket(e) {
+	            var _this4 = this;
+
 	            if (this.addToTicket.apiKey && this.addToTicket.ticketId) {
-	                var _this = this;
-	                e.currentTarget.innerText = "Please wait...";
-	                $.ajax({
-	                    url: "/create-note",
-	                    type: "POST",
-	                    data: {
-	                        ticketId: _this.addToTicket.ticketId,
-	                        note: _this.addToTicket.note,
-	                        fileName: _this.downloadFileName,
-	                        api: "Basic " + btoa("zDQFXNMCg0bjoS02dugQ:x"),
-	                        file: $("#copyData").text()
-	                    },
-	                    success: function success() {
-	                        e.currentTarget.innerText = "Done";
-	                    },
-	                    error: function error() {
-	                        // e.currentTarget.innerText = "Error !";
-	                    }
-	                });
+	                (function () {
+	                    var _this = _this4;
+	                    _this.addToTicket.success = false;
+	                    _this.addToTicket.error = false;
+	                    var dom = e.currentTarget;
+	                    dom.innerText = "Please wait...";
+	                    $.ajax({
+	                        url: "/create-file",
+	                        type: "POST",
+	                        data: {
+	                            fileName: _this.downloadFileName,
+	                            file: $("#copyData").text(),
+	                            api: _this.addToTicket.apiKey,
+	                            note: _this.addToTicket.note,
+	                            tid: _this.addToTicket.ticketId
+	                        },
+	                        success: function success(data) {
+	                            dom.innerText = "Attach";
+	                            if (data == "done") {
+	                                _this.addToTicket.success = true;
+	                            } else {
+	                                _this.addToTicket.error = true;
+	                            }
+	                        },
+	                        error: function error() {
+	                            // e.currentTarget.innerText = "Error !";
+	                        }
+	                    });
+	                })();
 	            }
 	        }
 	    }
@@ -19801,7 +19817,7 @@
 
 
 	// module
-	exports.push([module.id, "#copied {\n  display: none; }\n\n#query {\n  height: 125px; }\n\n.type-slider b {\n  position: relative;\n  bottom: 10px; }\n\n.view-docs span {\n  color: #2196F3; }\n\n.view-docs a {\n  color: black;\n  text-decoration: none; }\n\n.view-docs a:hover {\n  text-decoration: underline; }\n\n.input-group-addon {\n  cursor: pointer; }\n", ""]);
+	exports.push([module.id, "#copied {\n  display: none; }\n\n#query {\n  height: 125px; }\n\n.type-slider b {\n  position: relative;\n  bottom: 10px; }\n\n.view-docs span {\n  color: #2196F3; }\n\n.view-docs a {\n  color: black;\n  text-decoration: none; }\n\n.view-docs a:hover {\n  text-decoration: underline; }\n\n.input-group-addon {\n  cursor: pointer; }\n\n.form-input.result {\n  padding: 10px; }\n", ""]);
 
 	// exports
 
