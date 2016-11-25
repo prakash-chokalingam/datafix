@@ -390,6 +390,8 @@ var vm = new Vue({
                     },
                     error: function() {
                         // e.currentTarget.innerText = "Error !";
+                        dom.innerText = "Attach";
+                        _this.addToTicket.error = true;
                     }
                 });
             }

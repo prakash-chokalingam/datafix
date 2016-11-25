@@ -414,6 +414,8 @@
 	                        },
 	                        error: function error() {
 	                            // e.currentTarget.innerText = "Error !";
+	                            dom.innerText = "Attach";
+	                            _this.addToTicket.error = true;
 	                        }
 	                    });
 	                })();

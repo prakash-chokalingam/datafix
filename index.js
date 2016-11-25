@@ -10,12 +10,12 @@ var fs = require('fs');
 var unirest = require('unirest');
 // sql connection local
 
-var connection = mysql.createConnection({
-    socketPath: "/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock",
-    user: "root",
-    password: "",
-    database: "datafix"
-});
+// var connection = mysql.createConnection({
+//     socketPath: "/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock",
+//     user: "root",
+//     password: "",
+//     database: "datafix"
+// });
 
 // end of connection
 app.use(bodyParser.json()); // to support JSON-encoded bodies
@@ -51,7 +51,7 @@ app.post('/parser', function(req, res) {
     var table = req.body.table;
     var sendData;
     //sql connection Production
-    // var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
+    var connection = mysql.createConnection("mysql://b990c1f276fb62:39626419@us-cdbr-iron-east-04.cleardb.net/heroku_d3db7047dd25b61?reconnect=true");
     connection.connect(function(err) {
         if (err) {
             console.error('error connecting: ' + err.stack);
@@ -72,7 +72,7 @@ app.post('/parser', function(req, res) {
             var q = "DELETE FROM " + table + " WHERE id = " + result.insertId;
             connection.query(q, function(err, row) {});
             console.log(result.insertId + "Deleted");
-            //  connection.destroy();
+             connection.destroy();
             res.send(sendData);
         });
 
