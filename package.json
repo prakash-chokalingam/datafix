@@ -21,7 +21,6 @@
     "webpack": "^1.13.3"
   },
   "dependencies": {
-    "ajax-request": "^1.2.1",
     "body-parser": "^1.15.2",
     "clipboard": "^1.5.15",
     "dirty-markup": "^1.0.6",
@@ -33,6 +32,7 @@
     "npm": "^3.10.9",
     "request": "^2.76.0",
     "simple-sql-parser": "^1.3.1",
+    "unirest": "^0.5.1",
     "vue": "^2.0.3"
   },
   "repository": {
